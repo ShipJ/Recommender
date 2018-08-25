@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 
-# another comment
+# another comment - changed the comment
 
 
 @click.command()

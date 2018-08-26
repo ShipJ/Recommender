@@ -1,6 +1,7 @@
 import os, sys
 import numpy as np
 import pandas as pd
+pd.set_option('display.width', 500)
 
 
 def find_ngrams(input_list, n):
@@ -62,7 +63,8 @@ def clean_account(df, stem):
 
 
 def analyse(dfl, dfr):
-    print '\nQuick Data Analysis\n%s' % ('~'*20)
+    msg_1 = 'Quick Data Analysis'
+    print '\n%s\n%s' % (msg_1, '-'*len(msg_1))
     if dfl.equals(dfr):
         sys.exit('Warning - Data Sources Are Exactly the Same (Re-Run Required)')
     print '- LHS -'
@@ -79,7 +81,7 @@ def analyse(dfl, dfr):
     print '\nNulls: ',
     for j in dfr.columns:
         print len(dfr[dfr[j].isnull()]), '%ss,' % j,
-    print '\n%s' % ('~'*20)
+    print '\n%s' % ('-'*len(msg_1))
     return None
 
 
@@ -113,31 +115,21 @@ def check_path(path, side):
 
 
 def get_path(side):
-    print 'Use Default Data [1] or Set Manually [2]?'
-    choice = raw_input()
-    if choice == '1':
-        if side == 'L':
-            print 'Reading: /Users/JackShipway/Desktop/eu2.csv ...'
-            return check_path('/Users/JackShipway/Desktop/eu2.csv', side)
-        elif side == 'R':
-            print 'Reading: /Users/JackShipway/Desktop/us3.csv ...'
-            return check_path('/Users/JackShipway/Desktop/us3.csv', side)
-    elif choice == '2':
-        print 'Enter Path to Data Source (%s) in the following format: \n' \
-              'Mac: ''/Users/<Name>/Desktop/<filename>.<extension>\n' \
-              'PC: C:\Users\<Username>\Desktop\\<filename>.<extension>' % side
-        path = raw_input()
-        return check_path(path, side)
-    else:
-        print 'Please Type A Valid Integer From The Options Below!'
-        return get_path(side)
+    print 'Enter Path to Data Source (%s) in the following format: \n' \
+          'Mac: ''/Users/<Name>/Desktop/<filename>.<extension>\n' \
+          'PC: C:\Users\<Username>\Desktop\\<filename>.<extension>' % side
+    path = raw_input()
+    return check_path(path, side)
 
 
 def get_data(side, a_c):
     path, ext = get_path(side)
-    df = pd.DataFrame(pd.read_csv(path, delimiter=ext, low_memory=False)).drop_duplicates().reset_index(drop=True)
+    df = pd.DataFrame(pd.read_csv(path
+                                  , delimiter=ext
+                                  , low_memory=False
+                                  , encoding='utf-16')).drop_duplicates().reset_index(drop=True)
     if a_c == 'Account':
-        cols = ['Id', 'Name', 'Street', 'State', 'City', 'PostCode', 'Country', 'LastModified']
+        cols = ['Id', 'Name', 'Street', 'State', 'City', 'Postcode', 'Country', 'LastModified']
     else:
         cols = ['Id', 'Name', 'Email', 'HomePhone', 'MobilePhone', 'OtherPhone', 'JobRole', 'JobTitle', 'Street',
                 'State', 'City', 'PostCode', 'Country', 'LastModified', 'AccountId', 'AccountName', 'AccountCountry']

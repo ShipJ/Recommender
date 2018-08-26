@@ -1,26 +1,37 @@
 import sys
-
 from config import get_data, analysis_type, analyse
+from match import fuzzy
 
+__DEBUG__ = 0
 
 if __name__ == '__main__':
 
-    print '%s\nWelcome To Jack\'s Fuzzy Matching Algorithm!\n%s\n' % ('~'*43, '~'*43)
-    print 'What Would You Like To Analyse?\n%s' % ('-'*31)
-    a_c = analysis_type()
+    # Step 1 - Intro
+    msg_1 = 'Welcome To Jack\'s Fuzzy Matching Algorithm!'
+    print '%s\n%s\n%s\n' % ('~'*len(msg_1), msg_1, '~'*len(msg_1))
+    msg_2 = 'What Would You Like To Analyse?'
+    print '%s\n%s' % (msg_2, '-'*len(msg_2))
 
-    print '\nReading Data forming the LHS...\n%s' % ('-'*31)
+    # Step 2 - Load Data
+    a_c = analysis_type()
+    msg_3 = 'Reading Data forming the LHS...'
+    print '\n%s\n%s' % (msg_3, '-'*len(msg_3))
     dfl = get_data(side='L', a_c=a_c)
-    print '\n\nReading Data forming the RHS...\n%s' % ('-'*31)
+    msg_4 = 'Reading Data forming the RHS...'
+    print '\n\n%s\n%s' % (msg_4, '-'*len(msg_4))
     dfr = get_data(side='R', a_c=a_c)
 
+    # Step 3 - Summarise Data
     analyse(dfl, dfr)
-    print '\nHappy With Those Figures? [y/n]'
+    msg_5 = 'Happy With Those Figures? [y/n]'
+    print '\n%s' % msg_5
     response = raw_input()
     if response != 'y':
         sys.exit('Check Data Sources and Try Again.\n')
 
-    print '\nAlgorithm Running...\n%s' % ('~' * 20)
+    # Step 4 - Remove Exact Matches
 
-    # STEP 4 - Loop through all LHS records
-    # df_final = main_algo(dfl, dfr, a_c)
+
+
+    # Step 4 - Loop through all LHS records
+    df_final = fuzzy(__DEBUG__, dfl, dfr)

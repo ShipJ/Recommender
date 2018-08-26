@@ -1,50 +1,21 @@
-import pandas as pd
-from toggle import Record
+class Record:
+    def __init__(self
+                 , name_status, name_best, name_prob
+                 , address_status, address_best, address_prob
+                 , id_best, action):
+        # Name Status
+        self.name_status, self.name_best, self.name_prob = name_status, name_best, name_prob
+        # Address Status
+        self.address_status, self.address_best, self.address_prob = address_status, address_best, address_prob
+        # Index of Best Match, Action to Take
+        self.id_best, self.action = id_best, action
 
-
-lhs = pd.DataFrame(pd.read_csv('/Users/JackShipway/Desktop/lhs.txt', encoding='utf-16', delimiter='\t'))
-rhs = pd.DataFrame(pd.read_csv('/Users/JackShipway/Desktop/rhs.txt', encoding='utf-16', delimiter='\t'))
-
-
-# Get all exact matches
-exact = pd.merge(lhs, rhs, how='inner', on=['Name', 'Address', 'Country'])
-print 'There were %s Exact Matches!' % len(exact)
-
-lhs = lhs[~lhs['ID'].isin(exact['ID_x'])].reset_index(drop=True)
-rhs = rhs[~rhs['ID'].isin(exact['ID_y'])].reset_index(drop=True)
-
-for idx, row in lhs.iterrows():
-    status_i = Record('No Match', 'N/A', 0, 'No Match', 'N/A', 0, -1, 'Create New')
-
-    # All possible Matches
-    rhs_i = rhs[rhs['Country'] == row.Country]
-
-    # Check Name
-    name_matches = rhs_i[rhs_i['Name'] == row.Name]
-    if len(name_matches) > 0:
-        print 'There were %s matches!' % len(name_matches)
-        print name_matches
-
-    # Check Address
-    else:
-        print 'There were no name matches. Trying Address Instead'
-        address_matches = rhs_i[rhs_i['Address'] == row.Address]
-        if len(address_matches) > 0:
-            print 'There were %s matches!' % len(address_matches)
-
-
-        else:
-            pass
-            # best overall?
-
-
-
-
-
-
-
-
-
-
-
-
+    def toggle(self, record_type, match_status, best, prob):
+        if record_type == 'Name':
+            self.name_status = match_status
+            self.name_best = best
+            self.name_prob = prob
+        elif record_type == 'Address':
+            self.address_status = match_status
+            self.address_best = best
+            self.address_prob = prob

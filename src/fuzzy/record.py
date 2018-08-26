@@ -1,4 +1,5 @@
 import pandas as pd
+from toggle import Record
 
 
 lhs = pd.DataFrame(pd.read_csv('/Users/JackShipway/Desktop/lhs.txt', encoding='utf-16', delimiter='\t'))

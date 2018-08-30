@@ -10,6 +10,10 @@ class Record:
         # Index of Best Match, Action to Take
         self.id_best, self.action = id_best, action
 
+    def update_id_action(self, id_best, action):
+        self.id_best = id_best
+        self.action = action
+
     def toggle(self, record_type, match_status, best, prob):
         if record_type == 'Name':
             self.name_status = match_status

@@ -1,6 +1,6 @@
-import os, sys
-import numpy as np
+import os, sys, unicodedata
 import pandas as pd
+
 pd.set_option('display.width', 500)
 
 
@@ -8,63 +8,55 @@ def find_ngrams(input_list, n):
     return zip(*[input_list[i:] for i in range(n)])
 
 
+def setup(df):
+    df = df.fillna('')
+    df['Address'] = df['Postcode'] + ' ' + df['Street'] + ' ' + df['State'] + ' ' + df['City']
+    df['Address'] = df['Address'].str.strip()
+    cmap = {'South Korea': 'Korea, Republic of', 'USA': 'United States', 'US': 'United States', 'us': 'United States'
+            , 'UK': 'United Kingdom', 'Netherlands': 'The Netherlands', 'NL': 'The Netherlands', 'usa': 'United States'
+            , 'England': 'United Kingdom', 'Isreal': 'Israel', 'Italia': 'Italy', 'AU': 'Australia', 'JP': 'Japan'
+            , 'United states': 'United States', 'Beijing City, China': 'China', 'United Kingdon': 'United Kingdom'
+            , 'United Kingdpm': 'United Kingdom', 'United Arab Republic': 'United Arab Emirates',  '12525-5245': ''
+            , 'United States of America': 'United States', 'Belguim': 'Belgium', 'canada': 'Canada', 'Xhina': 'China'
+            , 'BRASIL': 'Brazil', 'United A': 'United Arab Emirates', 'Americas': 'United States', 'IT': 'Italy'
+            , 'switzerland': 'Switzerland', 'Dubai': 'United Arab Emirates', 'Germnay': 'Germany', 'Polska': 'Poland'
+            ,  'UAE': 'United Arab Emirates', 'UNITED STATES': 'United States', 'GERMANY': 'Germany', '2035': ''
+            , 'Korea': 'South Korea', 'Russian Federation': 'Russia', 'UT': 'United States', 'Europe': 'Czech Republic'
+            , 'Unite': 'United States', 'Sweeden': 'Sweden'}
+    df['Country'] = df['Country'].replace(cmap)
+    df['LastModified'] = pd.to_datetime(df['LastModified'])
+    return df
+
+
 def clean(dfl, dfr, a_c, stem_words):
-    print '- Step 2 -\nCleaning In Progress...'
+    msg_1 = 'Cleaning Data...'
+    print '%s\n%s' % (msg_1, '~' * len(msg_1))
+    print 'The Following Words Are Removed In The Matching Process:\n%s\n' % stem_words
     if a_c == 'Account':
         return clean_account(dfl, stem_words), clean_account(dfr, stem_words)
-    elif a_c == 'Contact':
-        return clean_contact(dfl, stem_words), clean_contact(dfr, stem_words)
     else:
         return sys.exit('Warning - Incorrect Analysis Type')
 
 
-def clean_contact(df, stem):
-    # Ensure all columns of type str
-    df = df.astype(str)
-    # Replace Null/Nan with empty str
-    df = df.replace({'Null': '', 'nan': '', })
-    # Dictionary mapping punctuation to spaces
-    punc_map = {',': ' ', '/': ' ', '\\': ' ', ':': ' ', ';': ' ', '.': ' ', '-': ' '}
-    # Apply mapping to Account/Title
-    for col in ['Account', 'Title']:
-        new_col = col + 'Strip'
-        for k, v in punc_map.iteritems():
-            df[new_col] = df[col].apply(lambda x: x.replace(k, v))
-        # Convert all to lower case
-        df[new_col] = df[new_col].str.lower().astype(str)
-        # Convert foreign characters and remove punctuation
-        df[new_col] = df[new_col].apply(lambda x: x.translate(None, string.punctuation))
-        # Remove all words where len(word) < 3 and exclude stem words
-        df[new_col] = df[new_col].apply(lambda x: ' '.join(i for i in [i for i in x.split(' ') if len(i) > 2 and i not in stem]))
-    return df
-
-
 def clean_account(df, stem):
-    for i in df.columns:
-        if i not in ['LastModified']:
-            df[i] = df[i].astype(str)
-    df['LastModified'] = pd.to_datetime(df['LastModified'])
+    punctuation = dict.fromkeys([i for i in xrange(sys.maxunicode) if unicodedata.category(unichr(i)).startswith('P')])
 
-    df = df.replace('Null', '').replace('nan', '')
-    df['Country'] = df['Country'].replace('South Korea', 'Korea, Republic of').replace('USA', 'United States')
-    df['NameStrip'] = df['Name'].apply(lambda x: x.replace(',', ' ').replace('/', ' ').replace('\\', ' ').replace(':', ' ').replace(';', ' ').replace('.', ' '))
-    df['NameStrip'] = df['NameStrip'].str.lower().astype(str)
-    df['NameStrip'] = df['NameStrip'].apply(lambda x: x.translate(None, string.punctuation))
-    df['NameStrip'] = df['NameStrip'].apply(lambda x: ' '.join(i for i in [i for i in x.split(' ') if len(i) > 2 and i not in stem]))
-    df['Address'] = df['PostCode'] + ' ' + df['Street'] + ' ' + df['City']
-    df['Address'] = df['Address'].str.strip()
-    df['AddressStrip'] = df['Address'].apply(lambda x: x.replace(',', ' ').replace('/', ' ').replace('\\', ' ').replace('\n', ' ').replace(':', ' ').replace(';', ' ').replace('.', ' '))
-    df['AddressStrip'] = df['AddressStrip'].str.lower().astype(str)
-    df['AddressStrip'] = df['AddressStrip'].apply(lambda x: x.translate(None, string.punctuation))
-    df['AddressStrip'] = df['AddressStrip'].apply(lambda x: ' '.join(i for i in [i for i in x.split(' ') if len(i) > 2 and i not in stem]))
-    df = df.replace('', np.nan)
-    df.columns = ['Id', 'Name', ]
+    # Convert to lower case and strip punctuation
+    df['NameStrip'] = df['Name'].str.lower().apply(lambda x: x.translate(punctuation) if x != '' else x)
+    df['AddressStrip'] = df['Address'].str.lower().apply(lambda x: x.translate(punctuation) if x != '' else x)
+
+    # Remove Stem Words and words of less than 2 characters
+    for col in ['NameStrip', 'AddressStrip']:
+        df[col] = df[col].apply(lambda x:
+                                ' '.join(word for word in
+                                         [w for w in x.split(' ') if len(w) > 2 and w not in stem]))
+    df = df[df['AddressStrip'] != '']
     return df
 
 
 def analyse(dfl, dfr):
     msg_1 = 'Quick Data Analysis'
-    print '\n%s\n%s' % (msg_1, '-'*len(msg_1))
+    print '\n%s\n%s' % (msg_1, '-' * len(msg_1))
     if dfl.equals(dfr):
         sys.exit('Warning - Data Sources Are Exactly the Same (Re-Run Required)')
     print '- LHS -'
@@ -81,15 +73,11 @@ def analyse(dfl, dfr):
     print '\nNulls: ',
     for j in dfr.columns:
         print len(dfr[dfr[j].isnull()]), '%ss,' % j,
-    print '\n%s' % ('-'*len(msg_1))
+    print '\n%s' % ('-' * len(msg_1))
     return None
 
 
 def analysis_type():
-    """
-
-    :return:
-    """
     print 'Accounts [1]\nContacts [2]'
     a_t = raw_input()
     if a_t == '1':
@@ -129,16 +117,15 @@ def get_data(side, a_c):
                                   , low_memory=False
                                   , encoding='utf-16')).drop_duplicates().reset_index(drop=True)
     if a_c == 'Account':
-        cols = ['Id', 'Name', 'Street', 'State', 'City', 'Postcode', 'Country', 'LastModified']
+        cols = ['Id', 'Name', 'Street', 'State', 'City', 'Postcode', 'Country', 'Opps', 'LastModified', ]
     else:
         cols = ['Id', 'Name', 'Email', 'HomePhone', 'MobilePhone', 'OtherPhone', 'JobRole', 'JobTitle', 'Street',
                 'State', 'City', 'PostCode', 'Country', 'LastModified', 'AccountId', 'AccountName', 'AccountCountry']
     try:
         df = df[cols]
-        print '...Data Read Ok!\n\nSample Data:\n', df.head()
+        print '...Data Read Ok!\n\nSample Data:\n', df.head(), '\n'
         return df
     except Exception, e:
         print 'Check Data Source. The Following Columns Should Exist:\n', cols
         print str(e)
         return get_data(side, a_c)
-

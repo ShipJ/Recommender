@@ -1,11 +1,14 @@
 import sys
-from config import get_data, analysis_type, analyse
-from match import fuzzy
+import pandas as pd
+from config import analysis_type, get_data, analyse, setup, clean
+from match import exact, fuzzy
+
+# /Users/JackShipway/Desktop/lhs.txt
+# /Users/JackShipway/OneDrive - Ascential/Data/FuzzyMatch/OCR/Cleaned/OCR_Clean.txt    Clavis_Clean.txt
 
 __DEBUG__ = 0
 
 if __name__ == '__main__':
-
     # Step 1 - Intro
     msg_1 = 'Welcome To Jack\'s Fuzzy Matching Algorithm!'
     print '%s\n%s\n%s\n' % ('~'*len(msg_1), msg_1, '~'*len(msg_1))
@@ -21,7 +24,11 @@ if __name__ == '__main__':
     print '\n\n%s\n%s' % (msg_4, '-'*len(msg_4))
     dfr = get_data(side='R', a_c=a_c)
 
-    # Step 3 - Summarise Data
+    # Step 3 - Format Data
+    dfl = setup(dfl)
+    dfr = setup(dfr)
+
+    # Step 4 - Summarise Data
     analyse(dfl, dfr)
     msg_5 = 'Happy With Those Figures? [y/n]'
     print '\n%s' % msg_5
@@ -29,9 +36,15 @@ if __name__ == '__main__':
     if response != 'y':
         sys.exit('Check Data Sources and Try Again.\n')
 
-    # Step 4 - Remove Exact Matches
+    # Step 6 - Clean Name/Address Fields
+    stem_words = ['plc', 'ltd', 'lp', 'the', 'and', 'inc', 'llc', 'financial', 'services', 'united', 'company', 'products',
+                  'city', 'corp', 'corporation', 'gmbh', 'asia', 'pacific', 'sol', 'limited', 'group']
+    dfl, dfr = clean(dfl, dfr, a_c, stem_words)
 
+    # Step 7 - Remove Exact Matches (after cleaning)
+    df_exact_clean, dfl, dfr = exact(dfl, dfr, col1='NameStrip', col2='AddressStrip')
 
-
-    # Step 4 - Loop through all LHS records
+    # Step 8 - Fuzzy Matching
     df_final = fuzzy(__DEBUG__, dfl, dfr)
+    df_final = pd.DataFrame(pd.concat([df_exact_clean, df_final]))
+    df_final.to_csv('/Users/JackShipway/Desktop/results4.txt', sep='\t', index=None, encoding='utf-16')

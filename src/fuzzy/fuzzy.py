@@ -1,10 +1,7 @@
 import sys
 import pandas as pd
 from config import analysis_type, get_data, analyse, setup, clean
-from match import exact, fuzzy
-
-# /Users/JackShipway/Desktop/lhs.txt
-# /Users/JackShipway/OneDrive - Ascential/Data/FuzzyMatch/OCR/Cleaned/OCR_Clean.txt    Clavis_Clean.txt
+from match_account import exact, fuzzy
 
 __DEBUG__ = 0
 

@@ -102,25 +102,33 @@ def check_path(path, side):
         return get_path(side)
 
 
-def get_path(side):
+def get_path(side, a_c):
     print 'Enter Path to Data Source (%s) in the following format: \n' \
           'Mac: ''/Users/<Name>/Desktop/<filename>.<extension>\n' \
-          'PC: C:\Users\<Username>\Desktop\\<filename>.<extension>' % side
+          'PC: C:\Users\<Username>\Desktop\\<filename>.<extension>\n' % side
+    if a_c == 'Account':
+        print '### Columns Headers ###\n[Id, Name, Street, State, City, Postcode, Country, Opps, LastModified]\n'
+    if a_c == 'Contact':
+        print '### Columns Headers ###\n[Id, Name, Email, HomePhone, MobilePhone, OtherPhone, JobRole, JobTitle' \
+              ', Street, State, City, PostCode, Country, LastModified, AccountID, AccountName, AccountCountry]\n'
     path = raw_input()
     return check_path(path, side)
 
 
 def get_data(side, a_c):
-    path, ext = get_path(side)
+    path, ext = get_path(side, a_c)
     df = pd.DataFrame(pd.read_csv(path
                                   , delimiter=ext
                                   , low_memory=False
                                   , encoding='utf-16')).drop_duplicates().reset_index(drop=True)
+
     if a_c == 'Account':
-        cols = ['Id', 'Name', 'Street', 'State', 'City', 'Postcode', 'Country', 'Opps', 'LastModified', ]
+        cols = ['Id', 'Name', 'Street', 'State', 'City', 'Postcode', 'Country', 'Opps', 'LastModified']
+    elif a_c == 'Contact':
+        cols = ['Id', 'Name', 'Email', 'Homephone', 'MobilePhone', 'OtherPhone', 'JobRole', 'JobTitle', 'Street',
+                'State', 'City', 'PostCode', 'Country', 'LastModified', 'AccountID', 'AccountName', 'AccountCountry']
     else:
-        cols = ['Id', 'Name', 'Email', 'HomePhone', 'MobilePhone', 'OtherPhone', 'JobRole', 'JobTitle', 'Street',
-                'State', 'City', 'PostCode', 'Country', 'LastModified', 'AccountId', 'AccountName', 'AccountCountry']
+        cols = []
     try:
         df = df[cols]
         print '...Data Read Ok!\n\nSample Data:\n', df.head(), '\n'

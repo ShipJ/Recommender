@@ -1,10 +1,10 @@
 import pandas as pd
-from record import Record
+from record import AccountMatch
 from config import find_ngrams
 from fuzzywuzzy import process
 
 
-def exact(dfl, dfr, col1, col2):
+def exact_account(dfl, dfr, col1, col2):
     msg_1 = 'Searching for EXACT Matches (Name & Address)...'
     print '%s\n%s' % (msg_1, '~'*len(msg_1))
     df_exact = pd.merge(dfl, dfr, how='inner', on=[col1, col2, 'Country'])
@@ -26,7 +26,7 @@ def exact(dfl, dfr, col1, col2):
     return df_exact, dfl, dfr
 
 
-def fuzzy(debug, dfl, dfr):
+def fuzzy_account(debug, dfl, dfr):
     msg_1 = 'Searching for FUZZY Matches...'
     msg_2 = '(Debug Mode Active)\n' if debug else '(Debug Mode Inactive)\n'
     print '%s\n%s\n%s' % (msg_1, '~' * len(msg_1), msg_2)
@@ -35,7 +35,7 @@ def fuzzy(debug, dfl, dfr):
     matching_records = []
     for idx, row in dfl.iterrows():
 
-        status_i = Record('No Name', 'N/A', 0, 'No Address', 'N/A', 0, -1, 'Create New')
+        status_i = AccountMatch('No Name', 'N/A', 0, 'No Address', 'N/A', 0, -1, 'Create New')
         rhs_i = dfr[dfr['Country'] == row.Country]
 
         # Search for Exact Name Match
@@ -95,16 +95,3 @@ def fuzzy(debug, dfl, dfr):
     df = df.append(matching_records)
     df.columns=['Id_L', 'Id_R', 'Name_L', 'Name_R', 'NameStatus', 'NameProb', 'Address_L', 'Address_R', 'AddressStatus', 'AddressProb']
     return df
-
-
-
-
-
-
-
-
-
-
-
-
-

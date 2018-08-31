@@ -1,7 +1,13 @@
 import sys
 import pandas as pd
 from config import analysis_type, get_data, analyse, setup, clean
-from match_account import exact, fuzzy
+from match_account import  exact_account, fuzzy_account
+from match_contact import  exact_contact, fuzzy_contact
+
+# /Users/JackShipway/Desktop/lhs.txt
+# /Users/JackShipway/OneDrive - Ascential/Data/FuzzyMatch/OCR/Cleaned/OCR_Clean.txt    Clavis_Clean.txt
+# /Users/JackShipway/Desktop/OCRContacts.txt     /Users/JackShipway/Desktop/ClavisContacts.txt
+
 
 __DEBUG__ = 0
 
@@ -22,8 +28,8 @@ if __name__ == '__main__':
     dfr = get_data(side='R', a_c=a_c)
 
     # Step 3 - Format Data
-    dfl = setup(dfl)
-    dfr = setup(dfr)
+    dfl = setup(dfl, a_c)
+    dfr = setup(dfr, a_c)
 
     # Step 4 - Summarise Data
     analyse(dfl, dfr)
@@ -39,9 +45,15 @@ if __name__ == '__main__':
     dfl, dfr = clean(dfl, dfr, a_c, stem_words)
 
     # Step 7 - Remove Exact Matches (after cleaning)
-    df_exact_clean, dfl, dfr = exact(dfl, dfr, col1='NameStrip', col2='AddressStrip')
+    # df_exact_clean, dfl, dfr = exact_account(dfl, dfr, col1='NameStrip', col2='AddressStrip')
+    df_exact_clean, dfl, dfr = exact_contact(dfl, dfr, col1='Name', col2='Email', col3='AccountStrip')
 
     # Step 8 - Fuzzy Matching
-    df_final = fuzzy(__DEBUG__, dfl, dfr)
-    df_final = pd.DataFrame(pd.concat([df_exact_clean, df_final]))
-    df_final.to_csv('/Users/JackShipway/Desktop/results4.txt', sep='\t', index=None, encoding='utf-16')
+    # df_final = fuzzy_account(__DEBUG__, dfl, dfr)
+    df_final = fuzzy_contact(__DEBUG__, dfl, dfr)
+
+    print df_final
+
+
+    # df_final = pd.DataFrame(pd.concat([df_exact_clean, df_final]))
+    # df_final.to_csv('/Users/JackShipway/Desktop/results4.txt', sep='\t', index=None, encoding='utf-16')

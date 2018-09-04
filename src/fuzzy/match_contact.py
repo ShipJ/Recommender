@@ -26,8 +26,8 @@ def exact_contact(dfl, dfr, col1, col2, col3):
     #
     df_exact.columns = [
         'Id_L', 'Id_R'
-        , 'Name_L', 'Name_R', 'NameStatus', 'NameProb'
         , 'Email_L', 'Email_R', 'EmailStatus', 'EmailProb'
+        , 'Name_L', 'Name_R', 'NameStatus', 'NameProb'
         , 'Account_L', 'Account_R', 'AccountStatus', 'AccountProb']
 
     return df_exact, dfl, dfr

@@ -114,7 +114,7 @@ def analysis_type():
         return analysis_type()
 
 
-def check_path(path, side):
+def check_path(path, side, a_c):
     if os.path.isfile(path):
         ext = path[-3:]
         if ext not in ('csv', 'txt', 'tsv'):
@@ -124,7 +124,7 @@ def check_path(path, side):
         return path, ext
     else:
         print 'Path Does Not Exist, Please Type A Valid Path!'
-        return get_path(side)
+        return get_path(side, a_c)
 
 
 def get_path(side, a_c):
@@ -137,7 +137,7 @@ def get_path(side, a_c):
         print '### Columns Headers ###\n[Id, Name, Email, HomePhone, MobilePhone, OtherPhone, JobRole, JobTitle' \
               ', Street, State, City, PostCode, Country, LastModified, AccountID, AccountName, AccountCountry]\n'
     path = raw_input()
-    return check_path(path, side)
+    return check_path(path, side, a_c)
 
 
 def get_data(side, a_c):
@@ -150,8 +150,8 @@ def get_data(side, a_c):
     if a_c == 'Account':
         cols = ['Id', 'Name', 'Street', 'State', 'City', 'Postcode', 'Country', 'Opps', 'LastModified']
     elif a_c == 'Contact':
-        cols = ['Id', 'Name', 'Email', 'Homephone', 'MobilePhone', 'OtherPhone', 'JobRole', 'JobTitle', 'Street',
-                'State', 'City', 'PostCode', 'Country', 'LastModified', 'AccountID', 'AccountName', 'AccountCountry']
+        cols = ['Id', 'Name', 'Email', 'HomePhone', 'MobilePhone', 'OtherPhone', 'JobRole', 'JobTitle', 'Street',
+                'State', 'City', 'PostCode', 'Country', 'LastModified', 'AccountId', 'AccountName', 'AccountCountry']
     else:
         cols = []
     try:

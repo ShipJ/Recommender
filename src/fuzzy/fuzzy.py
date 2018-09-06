@@ -15,7 +15,7 @@ __DEBUG__ = 1
 if __name__ == '__main__':
 
     if __DEBUG__:
-        logging.basicConfig(filename='/logfile.log', level=logging.INFO)
+        logging.basicConfig(filename='/fuzzy_match.log', level=logging.INFO)
 
     # Step 1 - Intro
     logging.info('Started Step 1 - Intro')

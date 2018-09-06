@@ -6,8 +6,8 @@ from match_account import exact_account, fuzzy_account
 from match_contact import exact_contact, fuzzy_contact
 
 '''
-/Users/JackShipway/Desktop/Latest/OCRContacts.txt
-/Users/JackShipway/Desktop/Latest/ClavisContacts.txt
+/Users/JackShipway/Desktop/Latest/X.txt
+/Users/JackShipway/Desktop/Latest/Y.txt
 '''
 
 __DEBUG__ = 1
@@ -15,7 +15,7 @@ __DEBUG__ = 1
 if __name__ == '__main__':
 
     if __DEBUG__:
-        logging.basicConfig(filename='/Users/JackShipway/Desktop/contacts_log.log', level=logging.INFO)
+        logging.basicConfig(filename='/logfile.log', level=logging.INFO)
 
     # Step 1 - Intro
     logging.info('Started Step 1 - Intro')

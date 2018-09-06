@@ -1,58 +1,63 @@
-import sys
+import logging
+import time
 import pandas as pd
-from config import analysis_type, get_data, analyse, setup, clean
+from config import intro, load, analyse, setup, clean
 from match_account import exact_account, fuzzy_account
 from match_contact import exact_contact, fuzzy_contact
 
-# /Users/JackShipway/Desktop/lhs.txt
-# /Users/JackShipway/OneDrive - Ascential/Data/FuzzyMatch/OCR/Cleaned/OCR_Clean.txt    Clavis_Clean.txt
-# /Users/JackShipway/Desktop/Latest/OCRContacts.txt     /Users/JackShipway/Desktop/ClavisContacts.txt
+'''
+/Users/JackShipway/Desktop/Latest/OCRContacts.txt
+/Users/JackShipway/Desktop/Latest/ClavisContacts.txt
+'''
 
-
-
-__DEBUG__ = 0
+__DEBUG__ = 1
 
 if __name__ == '__main__':
+
+    if __DEBUG__:
+        logging.basicConfig(filename='/Users/JackShipway/Desktop/contacts_log.log', level=logging.INFO)
+
     # Step 1 - Intro
-    msg_1 = 'Welcome To Jack\'s Fuzzy Matching Algorithm!'
-    print '%s\n%s\n%s\n' % ('~' * len(msg_1), msg_1, '~' * len(msg_1))
-    msg_2 = 'What Would You Like To Analyse?'
-    print '%s\n%s' % (msg_2, '-' * len(msg_2))
+    logging.info('Started Step 1 - Intro')
+    a_c = intro()
+    logging.info('Finished Step 1 - Intro')
 
     # Step 2 - Load Data
-    a_c = analysis_type()
-    msg_3 = 'Reading Data forming the LHS...'
-    print '\n%s\n%s' % (msg_3, '-' * len(msg_3))
-    dfl = get_data(side='L', a_c=a_c)
-    msg_4 = 'Reading Data forming the RHS...'
-    print '\n\n%s\n%s' % (msg_4, '-' * len(msg_4))
-    dfr = get_data(side='R', a_c=a_c)
+    logging.info('Started Step 2 - Data Load')
+    dfl, dfr = load()
+    logging.info('Finished Step 2 - Data Load')
 
     # Step 3 - Format Data
+    logging.info('Started Step 3 - Data Setup')
     dfl = setup(dfl, a_c)
     dfr = setup(dfr, a_c)
+    logging.info('Finished Step 3 - Data Setup')
 
     # Step 4 - Summarise Data
+    logging.info('Started Step 4 - Data Summary')
     analyse(dfl, dfr)
-    msg_5 = 'Happy With Those Figures? [y/n]'
-    print '\n%s' % msg_5
-    response = raw_input()
-    if response != 'y':
-        sys.exit('Check Data Sources and Try Again.\n')
+    logging.info('Finished Step 4 - Data Summary')
 
-    # Step 6 - Clean Name/Address Fields
-    stem_words = ['plc', 'ltd', 'lp', 'the', 'and', 'inc', 'llc', 'financial', 'services', 'united', 'company',
-                  'products',
-                  'city', 'corp', 'corporation', 'gmbh', 'asia', 'pacific', 'sol', 'limited', 'group']
-    dfl, dfr = clean(dfl, dfr, a_c, stem_words)
+    # Step 5 - Clean Name/Address Fields
+    logging.info('Started Step 5 - Data Clean')
+    dfl, dfr = clean(dfl, dfr, a_c)
+    logging.info('Finished Step 5 - Data Clean')
 
-    # Step 7 - Remove Exact Matches (after cleaning)
-    # df_exact_clean, dfl, dfr = exact_account(dfl, dfr, col1='NameStrip', col2='AddressStrip')
-    df_exact_clean, dfl, dfr = exact_contact(dfl, dfr, col1='Name', col2='Email', col3='AccountStrip')
+    # Step 6 - Remove Exact Matches
+    logging.info('Started Step 6 - Exact Matches')
+    if a_c == 'Account':
+        df_exact_clean, dfl, dfr = exact_account(dfl, dfr, col1='NameStrip', col2='AddressStrip')
+        df_final = fuzzy_account(__DEBUG__, dfl, dfr)
+    else:
+        df_exact_clean, dfl, dfr = exact_contact(dfl, dfr, col1='Name', col2='Email', col3='AccountStrip')
+        df_final = fuzzy_contact(__DEBUG__, dfl, dfr)
+    logging.info('Finished Step 6 - Exact Matches')
+    logging.info('Found %d Exact Matches: ' % len(df_exact_clean))
+    logging.info(df_exact_clean)
 
-    # Step 8 - Fuzzy Matching
-    # df_final = fuzzy_account(__DEBUG__, dfl, dfr)
-    df_final = fuzzy_contact(__DEBUG__, dfl, dfr)
-
+    logging.info('Started Step 7 - Processing Final Data Set')
     df_final = pd.DataFrame(pd.concat([df_exact_clean, df_final]))
-    df_final.to_csv('/Users/JackShipway/Desktop/Latest/results_1.txt', sep='\t', index=None, encoding='utf-16')
+    df_final['Overall'] = df_final['EmailStatus'] + ' ' + df_final['NameStatus'] + ' ' + df_final['AccountStatus']
+    logging.info('Finished Step 7 - Finished, and Successfully saved to csv')
+
+    # df_final.to_csv('/Users/JackShipway/Desktop/Latest/results_1.txt', sep='\t', index=None, encoding='utf-16')

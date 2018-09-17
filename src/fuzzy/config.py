@@ -50,7 +50,7 @@ def load():
     msg_4 = 'Reading Data forming the RHS...'
     print '\n\n%s\n%s' % (msg_4, '-' * len(msg_4))
     dfr = get_data(side='R', a_c=a_c)
-    return dfl, dfr
+    return a_c, dfl, dfr
 
 
 def find_ngrams(input_list, n):
@@ -58,8 +58,12 @@ def find_ngrams(input_list, n):
 
 
 def setup(df, a_c):
+    print a_c
     if a_c == 'Account':
         df = df.fillna('')
+        df = df.replace('null', '')
+        df = df.replace('Null', '')
+        df = df.replace('NULL', '')
         df['Address'] = df['Postcode'] + ' ' + df['Street'] + ' ' + df['State'] + ' ' + df['City']
         df['Address'] = df['Address'].str.strip()
         cmap = {'South Korea': 'Korea, Republic of', 'USA': 'United States', 'US': 'United States', 'us': 'United States'
@@ -86,7 +90,7 @@ def clean(dfl, dfr, a_c):
     msg_1 = 'Cleaning Data...'
     print '%s\n%s' % (msg_1, '~' * len(msg_1))
     stem_words = ['plc', 'ltd', 'lp', 'the', 'and', 'inc', 'llc', 'financial', 'services', 'united', 'company',
-                  'products', 'city', 'corp', 'corporation', 'gmbh', 'asia', 'pacific', 'sol', 'limited', 'group']
+                  'products', 'city', 'corp', 'corporation', 'gmbh', 'asia', 'pacific', 'sol', 'limited', 'group', 'europe', 'global', 'usa', 'emea']
     print 'The Following Words Are Removed In The Matching Process:\n%s\n' % stem_words
     if a_c == 'Account':
         return clean_account(dfl, stem_words), clean_account(dfr, stem_words)

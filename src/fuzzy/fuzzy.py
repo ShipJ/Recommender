@@ -6,11 +6,11 @@ from match_account import exact_account, fuzzy_account
 from match_contact import exact_contact, fuzzy_contact
 
 '''
-/Users/JackShipway/Desktop/Latest/X.txt
-/Users/JackShipway/Desktop/Latest/Y.txt
+/Users/JackShipway/Desktop/Latest/ClavisAccounts_v2.txt
+/Users/JackShipway/Desktop/Latest/OCRAccounts_v2.txt
 '''
 
-__DEBUG__ = 1
+__DEBUG__ = 0
 
 if __name__ == '__main__':
 
@@ -19,12 +19,12 @@ if __name__ == '__main__':
 
     # Step 1 - Intro
     logging.info('Started Step 1 - Intro')
-    a_c = intro()
+    intro()
     logging.info('Finished Step 1 - Intro')
 
     # Step 2 - Load Data
     logging.info('Started Step 2 - Data Load')
-    dfl, dfr = load()
+    a_c, dfl, dfr = load()
     logging.info('Finished Step 2 - Data Load')
 
     # Step 3 - Format Data
@@ -54,10 +54,9 @@ if __name__ == '__main__':
     logging.info('Finished Step 6 - Exact Matches')
     logging.info('Found %d Exact Matches: ' % len(df_exact_clean))
     logging.info(df_exact_clean)
-
     logging.info('Started Step 7 - Processing Final Data Set')
     df_final = pd.DataFrame(pd.concat([df_exact_clean, df_final]))
-    df_final['Overall'] = df_final['EmailStatus'] + ' ' + df_final['NameStatus'] + ' ' + df_final['AccountStatus']
+    # df_final['Overall'] = df_final['EmailStatus'] + ' ' + df_final['NameStatus'] + ' ' + df_final['AccountStatus']
     logging.info('Finished Step 7 - Finished, and Successfully saved to csv')
 
-    # df_final.to_csv('/Users/JackShipway/Desktop/Latest/results_1.txt', sep='\t', index=None, encoding='utf-16')
+    df_final.to_csv('/Users/JackShipway/Desktop/AccountResults_v0.txt', sep='\t', index=None, encoding='utf-16')

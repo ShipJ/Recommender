@@ -35,6 +35,7 @@ def fuzzy_account(debug, dfl, dfr):
     matching_records = []
 
     for idx, row in dfl.iterrows():
+        print idx
 
         status_i = AccountMatch('No Name', 'N/A', 0, 'No Address', 'N/A', 0, -1, 'Create New')
         rhs_i = dfr[dfr['Country'] == row.Country]
@@ -64,7 +65,7 @@ def fuzzy_account(debug, dfl, dfr):
                 print '...%d Exact Address Match(es) Found:\n' % len(address_matches)
                 # Select Closest Name Match
                 match = process.extractOne(row.NameStrip, address_matches.NameStrip)
-                print address_matches[address_matches.NameStrip == match[0]]
+                address_matches = address_matches[address_matches.NameStrip == match[0]].reset_index(drop=True)
                 status_i.update_id_action(address_matches[address_matches.NameStrip == match[0]]['Id'].loc[0], 'Verify')
                 status_i.toggle('Name', 'Partial Name', match[0], match[1])
                 status_i.toggle('Address', 'Exact Address', address_matches['AddressStrip'].loc[0], 100)
@@ -72,19 +73,29 @@ def fuzzy_account(debug, dfl, dfr):
             else:
                 print 'Neither Name nor Address Found: '
                 trigrams = [''.join(i) for i in find_ngrams(row.NameStrip, 3)]
+                trigrams = [i.replace(' ', '').replace('+', '') for i in trigrams if len(i) > 2]
+                print trigrams
                 trigram_matches = rhs_i[rhs_i['NameStrip'].str.contains('|'.join(trigrams), na=False)]
+
                 if not trigram_matches.empty:
+                    print 'Trigram Matches Found'
                     trigram_matches['NameAddress'] = trigram_matches['NameStrip'] + ' ' + trigram_matches[
                         'AddressStrip']
+                    print row.AddressStrip
                     best_match = process.extractOne(row.NameAddress, trigram_matches['NameAddress'])
                     best = trigram_matches[trigram_matches['NameAddress'] == best_match[0]].reset_index(drop=True)
                     status_i.update_id_action(best['Id'].loc[0], 'Verify')
 
-                    best_name = process.extractOne(row.NameStrip, trigram_matches['NameStrip'])
-                    best_address = process.extractOne(row.AddressStrip, trigram_matches['AddressStrip'])
+                    best_name = process.extractOne(row.NameStrip, best['NameStrip'])
+                    best_address = process.extractOne(row.AddressStrip, best['AddressStrip'])
+
+                    print best_name
+                    print best_address
+
                     status_i.toggle('Name', 'Partial Name', best_name[0], best_name[1])
                     status_i.toggle('Address', 'Partial Address', best_address[0], best_address[1])
                 else:
+                    print 'No Trigram Matches Found'
                     pass
 
         print row.Id, '|', row.NameStrip, '|', row.AddressStrip

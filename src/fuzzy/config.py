@@ -110,6 +110,7 @@ def clean_account(df, stem):
         df[col] = df[col].apply(lambda x:
                                 ' '.join(word for word in
                                          [w for w in x.split(' ') if len(w) > 2 and w not in stem]))
+
     df = df[df['AddressStrip'] != '']
     return df
 
